@@ -24,9 +24,9 @@ public class Main {
     }
 
     static double checkEffectiveness(String attacker, String defender) {
-        switch (attacker) {
+        switch (attacker.toLowerCase()) {
             case "fire":
-                switch (defender) {
+                switch (defender.toLowerCase()) {
                     case "fire":
                     case "water":
                         return 0.5;
@@ -36,7 +36,7 @@ public class Main {
                         return 1.0;
                 }
             case "water":
-                switch (defender) {
+                switch (defender.toLowerCase()) {
                     case "fire":
                         return 2.0;
                     case "grass":
@@ -46,7 +46,7 @@ public class Main {
                         return 1.0;
                 }
             case "grass":
-                switch (defender) {
+                switch (defender.toLowerCase()) {
                     case "fire":
                     case "grass":
                         return 0.5;
@@ -59,20 +59,41 @@ public class Main {
         return 1.0;
     }
 
+    static Move chooseMove() {
+        ArrayList<Move> moveList = currentUserPokemon.moveList;
+        System.out.println("------------------------------------");
+        System.out.printf("|   %s   |    %s   |\n", moveList.get(0).name, moveList.get(1).name);
+        System.out.printf("|  %s/%s     |   %s/%s       |\n", moveList.get(0).PP, moveList.get(0).MaxPP, moveList.get(1).PP, moveList.get(1).MaxPP);
+        System.out.println("------------------------------------");
+        System.out.printf("|   %s   |    %s    |\n", moveList.get(2).name, moveList.get(3).name);
+        System.out.printf("|      %s/%s      |      %s/%s    |\n", moveList.get(2).PP, moveList.get(2).MaxPP, moveList.get(3).PP, moveList.get(3).MaxPP);
+        System.out.println("------------------------------------");
+        while (true) {
+            Scanner keyboard = new Scanner(System.in);
+            System.out.print("What move are you using?\n> ");
+            String moveToUse = keyboard.nextLine();
+            for (Move move: moveList) {
+                if (move.name.equalsIgnoreCase(moveToUse) && move.PP != 0) {
+                    return move;
+                }
+            }
+        }
+    }
+
     static void dealDamage(Pokemon pokemon, Move move, String attacker) {
         if (move.name.equalsIgnoreCase("leech seed")) {
             leeching = true;
         } else {
             if (attacker.equalsIgnoreCase("computer")) {
-                pokemon.health -= ((12 * move.power * pokemon.attack / pokemon.defense) / 50) * checkEffectiveness(currentComPokemon.type, currentUserPokemon.type);
+                pokemon.health -= ((12 * move.power * currentComPokemon.attack / pokemon.defense) / 50) * checkEffectiveness(currentComPokemon.type, currentUserPokemon.type);
             } else if (attacker.equalsIgnoreCase("user")) {
-                pokemon.health -= ((12 * move.power * pokemon.attack / pokemon.defense) / 50) * checkEffectiveness(currentUserPokemon.type, currentComPokemon.type);
+                pokemon.health -= ((12 * move.power * currentUserPokemon.attack / pokemon.defense) / 50) * checkEffectiveness(currentUserPokemon.type, currentComPokemon.type);
             }
         }
         if (leeching) {
             pokemon.health -= pokemon.health * .0625;
         }
-        move.PP -= 1;
+        move.PP = Math.max(0, move.PP - 1);
         if (pokemon.health <= 0) {
             pokemon.health = 0;
         }
@@ -102,7 +123,7 @@ public class Main {
         while (comTeam.size() < 6) {
             int randomIndex = (int) Math.floor(Math.random() * allPokemon.size());
             Pokemon randomPokemon = allPokemon.get(randomIndex);
-            if (! userTeam.contains(randomPokemon)) {
+            if (! userTeam.contains(randomPokemon) && !comTeam.contains(randomPokemon)) {
                 comTeam.add(randomPokemon);
             }
         }
@@ -116,6 +137,14 @@ public class Main {
     static void swapUserPokemon() {
         Scanner keyboard = new Scanner(System.in);
         boolean validPokemon = false;
+            System.out.println("----------------------------------------");
+            System.out.printf("|   %s   |   %s  |  %s  |\n", userTeam.get(0).name, userTeam.get(1).name, userTeam.get(2).name);
+            System.out.printf("|   %s/%s    |    %s/%s   |    %s/%s   |\n", userTeam.get(0).health, userTeam.get(0).maxHealth, userTeam.get(1).health, userTeam.get(1).maxHealth, userTeam.get(2).health, userTeam.get(2).maxHealth);
+            System.out.println("----------------------------------------");
+            System.out.printf("|   %s   |   %s  |  %s  |\n", userTeam.get(3).name, userTeam.get(4).name, userTeam.get(5).name);
+            System.out.printf("|   %s/%s    |    %s/%s   |    %s/%s   |\n", userTeam.get(3).health, userTeam.get(3).maxHealth, userTeam.get(4).health, userTeam.get(4).maxHealth, userTeam.get(5).health, userTeam.get(5).maxHealth);
+            System.out.println("----------------------------------------");
+
         while (true) {
             System.out.print("What pokemon are you swapping to?\n> ");
             String pokemonToSwapTo = keyboard.next();
@@ -136,7 +165,6 @@ public class Main {
 
     static void swapComPokemon() {
         while (true) {
-            System.out.println("Boo");
             int randomIndex = (int) Math.floor(Math.random() * comTeam.size());
             Pokemon randomPokemon = comTeam.get(randomIndex);
             if (randomPokemon.health != 0) {
@@ -253,25 +281,28 @@ public class Main {
             String input = keyboard.next();
             keyboard.nextLine();
             if (input.equalsIgnoreCase("fight")) {
-                currentUserPokemon.showMoveSet();
-                System.out.print("What move are you using?\n> ");
-                String moveToUse = keyboard.nextLine();
-                dealDamage(currentComPokemon, currentUserPokemon.useMove(moveToUse), "computer");
+                Move moveToUse = chooseMove();
+                dealDamage(currentComPokemon, moveToUse, "user");
                 if (! postTurnsCheck(comTeam)) {
+                    updateScreen();
                     System.out.println("Computer is out of usable pokemon!");
                     System.out.println("You win!");
                     break;
                 }
                 if (currentComPokemon.health == 0) {
-                    System.out.printf("%s fainted!", currentComPokemon.name);
+                    System.out.printf("\n%s fainted!\n", currentComPokemon.name);
                     swapComPokemon();
+                    updateScreen();
+                    continue;
                 }
                 updateScreen();
             } else if (input.equalsIgnoreCase("swap")) {
                 swapUserPokemon();
+                updateScreen();
             }
-            dealDamage(currentUserPokemon, currentComPokemon.useRandomMove(), "user");
+            dealDamage(currentUserPokemon, currentComPokemon.useRandomMove(), "computer");
             if (! postTurnsCheck(userTeam)) {
+                updateScreen();
                 System.out.println("User is out of usable pokemon!");
                 System.out.println("User blacked out!");
                 break;
@@ -279,6 +310,7 @@ public class Main {
             if (currentUserPokemon.health == 0) {
                 System.out.printf("%s fainted! Choose another pokemon!\n", currentUserPokemon.name);
                 swapUserPokemon();
+                continue;
             }
             updateScreen();
             if (input.equalsIgnoreCase("quit")) {

@@ -22,21 +22,17 @@ public class Pokemon {
         }
     }
 
-    public Move useMove(String moveName) {
-        Move usedMove = null;
-        for (Move move: moveList) {
-            if (move.name.equalsIgnoreCase(moveName)) {
-                usedMove = move;
+    public Move useRandomMove() {
+        while (true) {
+            int randomIndex = (int) Math.floor(Math.random() * moveList.size());
+            Move randomMove = moveList.get(randomIndex);
+            if (randomMove.PP != 0) {
+                System.out.printf("%s used %s!\n", this.name, randomMove.name);
+                return randomMove;
+            } else if (moveList.stream().allMatch(p->p.PP==0)) {
+                return new Move("Struggle", "Normal", 20, 1000, 100);
             }
         }
-        return usedMove;
-    }
-
-    public Move useRandomMove() {
-        int randomIndex = (int) Math.floor(Math.random() * moveList.size());
-        Move randomMove = moveList.get(randomIndex);
-        System.out.printf("%s used %s!\n", this.name, randomMove.name);
-        return randomMove;
     }
 
     public void showPokemonInfo() {
