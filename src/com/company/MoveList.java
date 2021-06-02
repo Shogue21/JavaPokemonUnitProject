@@ -1,17 +1,11 @@
 package com.company;
 
+import lombok.*;
+
 import java.util.ArrayList;
 
-public class MoveList implements java.io.Serializable {
+public @Data class MoveList implements java.io.Serializable {
     private ArrayList<Move> moves = new ArrayList<>();
-
-    public ArrayList<Move> getMoves() {
-        return moves;
-    }
-
-    public void setMoves(ArrayList<Move> moves) {
-        this.moves = moves;
-    }
 
     public MoveList(){
         Move razorLeaf = new Move("Razor Leaf", "Grass", 55, 25, 95);
@@ -47,5 +41,32 @@ public class MoveList implements java.io.Serializable {
         moves.add(surf);
         Move bubbleBeam = new Move("Bubble Beam", "Water", 65, 20, 100);
         moves.add(bubbleBeam);
+
+        Move spark = new Move("Spark", "Electric", 65, 20, 100);
+        moves.add(spark);
+        Move thunder = new Move("Thunder", "Electric", 110, 10, 70);
+        moves.add(thunder);
+        Move thundershock = new Move("Thunder Shock", "Electric", 40, 30, 100);
+        moves.add(thundershock);
+        Move discharge = new Move("Discharge", "Electric", 80, 15, 100);
+        moves.add(discharge);
+
+        Move earthquake = new Move("Earthquake", "Ground", 100, 10, 100);
+        moves.add(earthquake);
+        Move mudshot = new Move("Mud Shot", "Ground", 55, 15, 95);
+        moves.add(mudshot);
+        Move mudbomb = new Move("Mud Bomb", "Ground", 65, 10, 85);
+        moves.add(mudbomb);
+        Move earthpower = new Move("Earth Power", "Ground", 90, 10, 100);
+        moves.add(earthpower);
+
+        Move acrobatics = new Move("Acrobatics", "Flying", 55, 15, 100);
+        moves.add(acrobatics);
+        Move airslash = new Move("Air Slash", "Flying", 75, 15, 95);
+        moves.add(airslash);
+        Move gust = new Move("Gust", "Flying", 40, 35, 100);
+        moves.add(gust);
+        Move hurricane = new Move("Hurricane", "Flying", 110, 10, 70);
+        moves.add(hurricane);
     }
 }

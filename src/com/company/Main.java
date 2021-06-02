@@ -219,27 +219,74 @@ public class Main {
                     case "grass":
                         return 2.0;
                     case "normal":
+                    case "ground":
+                    case "flying":
+                    case "electric":
                         return 1.0;
                 }
             case "water":
                 switch (defender.toLowerCase()) {
                     case "fire":
+                    case "ground":
                         return 2.0;
                     case "grass":
                     case "water":
                         return 0.5;
                     case "normal":
+                    case "electric":
+                    case "flying":
                         return 1.0;
                 }
             case "grass":
                 switch (defender.toLowerCase()) {
                     case "fire":
                     case "grass":
+                    case "flying":
                         return 0.5;
                     case "water":
+                    case "ground":
                         return 2.0;
                     case "normal":
+                    case "electric":
                         return 1.0;
+                }
+            case "electric":
+                switch (defender.toLowerCase()) {
+                    case "electric":
+                    case "grass":
+                        return 0.5;
+                    case "ground":
+                        return 0.0;
+                    case "flying":
+                    case "water":
+                        return 2.0;
+                    case "fire":
+                        return 1.0;
+                }
+            case "flying":
+                switch (defender.toLowerCase()) {
+                    case "electric":
+                        return 0.5;
+                    case "fire":
+                    case "water":
+                    case "ground":
+                    case "flying":
+                        return 1.0;
+                    case "grass":
+                        return 2.0;
+                }
+            case "ground":
+                switch (defender.toLowerCase()) {
+                    case "water":
+                    case "ground":
+                        return 1.0;
+                    case "flying":
+                        return 0;
+                    case "grass":
+                        return 0.5;
+                    case "fire":
+                    case "electric":
+                        return 2.0;
                 }
         }
         return 1.0;
@@ -267,11 +314,25 @@ public class Main {
     }
 
     static void dealDamage(Pokemon pokemon, Move move, String attacker) {
+        double crit = 1.0;
+        double stab = 1.0;
+        if (Math.random() * 100 < 15) {
+            switch (attacker) {
+                case "user":
+                    System.out.println(currentUserPokemon.getName() + " got a critical hit!");
+                case "computer":
+                    System.out.println(currentComPokemon.getName() + " got a critical hit!");
+            }
+            crit = 2;
+        }
+        if (move.getType().equalsIgnoreCase(pokemon.getType())) {
+            stab = 1.5;
+        }
         if (Math.random() * 100 < move.getAccuracy()) {
             if (attacker.equalsIgnoreCase("computer")) {
-                pokemon.setHealth((int) (pokemon.getHealth() - ((12 * move.getPower() * currentComPokemon.getAttack() / pokemon.getDefense()) / 50) * checkEffectiveness(currentComPokemon.getType(), currentUserPokemon.getType())));
+                pokemon.setHealth((int) (pokemon.getHealth() - ((12 * move.getPower() * currentComPokemon.getAttack() / pokemon.getDefense()) / 50) * checkEffectiveness(currentComPokemon.getType(), currentUserPokemon.getType()) * crit * stab));
             } else if (attacker.equalsIgnoreCase("user")) {
-                pokemon.setHealth((int) (pokemon.getHealth() - ((12 * move.getPower() * currentUserPokemon.getAttack() / pokemon.getDefense()) / 50) * checkEffectiveness(currentUserPokemon.getType(), currentComPokemon.getType())));
+                pokemon.setHealth((int) (pokemon.getHealth() - ((12 * move.getPower() * currentUserPokemon.getAttack() / pokemon.getDefense()) / 50) * checkEffectiveness(currentUserPokemon.getType(), currentComPokemon.getType()) * crit * stab));
             }
         } else {
             if (attacker.equalsIgnoreCase("user")) {
@@ -378,9 +439,6 @@ public class Main {
 
             createUserTeam();
             currentUserPokemon = userTeam.get(0);
-            for (Pokemon pokemon : userTeam) {
-                System.out.println(pokemon);
-            }
             createComTeam();
             currentComPokemon = comTeam.get(0);
         }
